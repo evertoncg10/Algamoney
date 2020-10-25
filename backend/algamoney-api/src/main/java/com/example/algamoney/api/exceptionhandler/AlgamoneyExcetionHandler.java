@@ -3,6 +3,7 @@ package com.example.algamoney.api.exceptionhandler;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -28,27 +29,39 @@ public class AlgamoneyExcetionHandler extends ResponseEntityExceptionHandler {
 	private MessageSource messageSource;
 
 	@Override
-	protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex,
-			HttpHeaders headers, HttpStatus status, WebRequest request) {
-		String mensagemUsuario = messageSource.getMessage("mensagem.invalida", null, LocaleContextHolder.getLocale());
-		String mensagemDesenvolvedor = ex.getCause().toString();
-		List<Erro> erros = Arrays.asList(new Erro(mensagemUsuario, mensagemDesenvolvedor));
-		return handleExceptionInternal(ex, erros, headers, HttpStatus.BAD_REQUEST, request);
+	protected ResponseEntity<Object> handleHttpMessageNotReadable(
+			HttpMessageNotReadableException ex, HttpHeaders headers,
+			HttpStatus status, WebRequest request) {
+
+		String mensagemUsuario = messageSource.getMessage("mensagem.invalida",
+				null, LocaleContextHolder.getLocale());
+
+		String mensagemDesenvolvedor = Optional.ofNullable(ex.getCause())
+				.orElse(ex).toString();
+
+		List<Erro> erros = Arrays
+				.asList(new Erro(mensagemUsuario, mensagemDesenvolvedor));
+
+		return handleExceptionInternal(ex, erros, headers,
+				HttpStatus.BAD_REQUEST, request);
 	}
 
 	@Override
-	protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
-			HttpHeaders headers, HttpStatus status, WebRequest request) {
+	protected ResponseEntity<Object> handleMethodArgumentNotValid(
+			MethodArgumentNotValidException ex, HttpHeaders headers,
+			HttpStatus status, WebRequest request) {
 
 		List<Erro> erros = criarListaDeErros(ex.getBindingResult());
-		return handleExceptionInternal(ex, erros, headers, HttpStatus.BAD_REQUEST, request);
+		return handleExceptionInternal(ex, erros, headers,
+				HttpStatus.BAD_REQUEST, request);
 	}
 
 	private List<Erro> criarListaDeErros(BindingResult bindingResult) {
 		List<Erro> erros = new ArrayList<>();
 
 		for (FieldError fieldError : bindingResult.getFieldErrors()) {
-			String mensagemUsuario = messageSource.getMessage(fieldError, LocaleContextHolder.getLocale());
+			String mensagemUsuario = messageSource.getMessage(fieldError,
+					LocaleContextHolder.getLocale());
 			String mensagemDesenvolvedor = fieldError.toString();
 			erros.add(new Erro(mensagemUsuario, mensagemDesenvolvedor));
 		}
@@ -56,15 +69,18 @@ public class AlgamoneyExcetionHandler extends ResponseEntityExceptionHandler {
 		return erros;
 	}
 
-	@ExceptionHandler({ EmptyResultDataAccessException.class })
+	@ExceptionHandler({EmptyResultDataAccessException.class})
 	@ResponseStatus(HttpStatus.NOT_FOUND)
-	public ResponseEntity<Object> handleEmptyResultDataAccessException(EmptyResultDataAccessException ex,
-			WebRequest request) {
-		String mensagemUsuario = messageSource.getMessage("recurso.nao-encontrado", null,
+	public ResponseEntity<Object> handleEmptyResultDataAccessException(
+			EmptyResultDataAccessException ex, WebRequest request) {
+		String mensagemUsuario = messageSource.getMessage(
+				"recurso.nao-encontrado", null,
 				LocaleContextHolder.getLocale());
 		String mensagemDesenvolvedor = ex.toString();
-		List<Erro> erros = Arrays.asList(new Erro(mensagemUsuario, mensagemDesenvolvedor));
-		return handleExceptionInternal(ex, erros, new HttpHeaders(), HttpStatus.NOT_FOUND, request);
+		List<Erro> erros = Arrays
+				.asList(new Erro(mensagemUsuario, mensagemDesenvolvedor));
+		return handleExceptionInternal(ex, erros, new HttpHeaders(),
+				HttpStatus.NOT_FOUND, request);
 	}
 
 	public static class Erro {
