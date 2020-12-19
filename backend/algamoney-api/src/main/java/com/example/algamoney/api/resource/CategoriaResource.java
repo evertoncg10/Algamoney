@@ -25,44 +25,44 @@ import com.example.algamoney.api.repository.CategoriaRepository;
 @RequestMapping("/categorias")
 public class CategoriaResource {
 
-	@Autowired
-	private CategoriaRepository categoriaRepository;
+    @Autowired
+    private CategoriaRepository categoriaRepository;
 
-	@Autowired
-	private ApplicationEventPublisher publisher;
+    @Autowired
+    private ApplicationEventPublisher publisher;
 
-	@GetMapping
-	public List<Categoria> listar() {
-		return categoriaRepository.findAll();
-	}
+    @GetMapping
+    public List<Categoria> listar() {
+        return categoriaRepository.findAll();
+    }
 
-	@PostMapping
-	public ResponseEntity<Categoria> criar(@Valid @RequestBody Categoria categoria, HttpServletResponse response) {
-		Categoria categoriaSalva = categoriaRepository.save(categoria);
+    @PostMapping
+    public ResponseEntity<Categoria> criar(@Valid @RequestBody Categoria categoria, HttpServletResponse response) {
+        Categoria categoriaSalva = categoriaRepository.save(categoria);
 
-		publisher.publishEvent(new RecursoCriadoEvent(this, response, categoriaSalva.getCodigo()));
+        publisher.publishEvent(new RecursoCriadoEvent(this, response, categoriaSalva.getCodigo()));
 
-		return ResponseEntity.status(HttpStatus.CREATED).body(categoriaSalva);
-	}
+        return ResponseEntity.status(HttpStatus.CREATED).body(categoriaSalva);
+    }
 
-	@GetMapping("/{codigo}")
-	public ResponseEntity<Categoria> buscarPeloCodigo(@PathVariable Long codigo) {
+    @GetMapping("/{codigo}")
+    public ResponseEntity<Categoria> buscarPeloCodigo(@PathVariable Long codigo) {
 
-		// Maneira tradicional
-//		Optional<Categoria> optionalCategoria = categoriaRepository.findById(codigo);
-//		if (optionalCategoria != null) {
-//			return ResponseEntity.ok(optionalCategoria.get());
-//		}
-//
-//		return ResponseEntity.notFound().build();
+        // Maneira tradicional
+        //		Optional<Categoria> optionalCategoria = categoriaRepository.findById(codigo);
+        //		if (optionalCategoria != null) {
+        //			return ResponseEntity.ok(optionalCategoria.get());
+        //		}
+        //
+        //		return ResponseEntity.notFound().build();
 
-		// Maneira utilizando Map
-//		return this.categoriaRepository.findById(codigo).map(categoria -> ResponseEntity.ok(categoria))
-//				.orElse(ResponseEntity.notFound().build());
+        // Maneira utilizando Map
+        //		return this.categoriaRepository.findById(codigo).map(categoria -> ResponseEntity.ok(categoria))
+        //				.orElse(ResponseEntity.notFound().build());
 
-		// Maneira utilizando isPresent()
-		Optional<Categoria> categoria = this.categoriaRepository.findById(codigo);
-		return categoria.isPresent() ? ResponseEntity.ok(categoria.get()) : ResponseEntity.notFound().build();
+        // Maneira utilizando isPresent()
+        Optional<Categoria> categoria = this.categoriaRepository.findById(codigo);
+        return categoria.isPresent() ? ResponseEntity.ok(categoria.get()) : ResponseEntity.notFound().build();
 
-	}
+    }
 }
